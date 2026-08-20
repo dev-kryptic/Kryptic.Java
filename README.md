@@ -1,6 +1,6 @@
-# Kryptic Java SDK (dev.kryptic:krypticdev)
+# Kryptic Daemon Client (dev.kryptic:daemon-client)
 
-Zero-dependency core SDK. The JVM cannot modify its own process environment, so secrets
+Zero-dependency core client. The JVM cannot modify its own process environment, so secrets
 land in **system properties**; `Kryptic.fetch()` returns them as a map for framework
 integrations (the Spring Boot module with `@EnableKryptic` builds on it).
 

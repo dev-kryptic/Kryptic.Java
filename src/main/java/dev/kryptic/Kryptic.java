@@ -15,16 +15,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The Kryptic Java SDK. During development startup, {@link #inject()} fetches the
+ * The Kryptic daemon client for Java. During development startup, {@link #inject()} fetches the
  * current project's secrets from the local Kryptic daemon and exposes them as system
  * properties (the JVM cannot modify its own process environment). Outside development
- * it is a no-op, and it never throws — a missing daemon means the application simply
+ * it is a no-op, and it never throws - a missing daemon means the application simply
  * starts with the configuration it already has.
  *
  * <p>Spring Boot integration ({@code @EnableKryptic} feeding the Spring Environment)
  * builds on {@link #fetch()} and ships as a separate module.
  *
- * <p>Protocol: daemon/PROTOCOL.md v1 (newline-delimited JSON over a local socket —
+ * <p>Protocol: daemon/PROTOCOL.md v1 (newline-delimited JSON over a local socket -
  * a unix domain socket on macOS/Linux, a named pipe on Windows).
  */
 public final class Kryptic {
@@ -66,7 +66,7 @@ public final class Kryptic {
     }
 
     /**
-     * Fetches the secrets as a map without touching system properties — the hook for
+     * Fetches the secrets as a map without touching system properties - the hook for
      * framework integrations. Returns an empty map on any problem (after one warning).
      */
     public static Map<String, String> fetch() {
@@ -97,7 +97,7 @@ public final class Kryptic {
         if (projectId == null && config != null) projectId = (String) config.get("projectId");
         if (projectId == null)
             throw new KrypticUnavailableException("no_project",
-                "no kryptic.json found (and no KRYPTIC_PROJECT_ID set) — nothing to inject.");
+                "no kryptic.json found (and no KRYPTIC_PROJECT_ID set) - nothing to inject.");
 
         String environment = env("KRYPTIC_ENV");
         if (environment == null && config != null) environment = (String) config.get("defaultEnvironment");
@@ -109,7 +109,7 @@ public final class Kryptic {
                 "v", PROTOCOL_VERSION, "type", "secrets", "projectId", projectId, "environment", environment))));
         } catch (IOException | RuntimeException e) {
             throw new KrypticUnavailableException("daemon_unreachable",
-                "daemon not reachable (" + e.getMessage() + ") — continuing without injected secrets.");
+                "daemon not reachable (" + e.getMessage() + ") - continuing without injected secrets.");
         }
 
         if (!Boolean.TRUE.equals(response.get("ok"))) {
@@ -197,9 +197,9 @@ public final class Kryptic {
 
     /**
      * Round trip over a Windows named pipe. The daemon serves a byte-mode pipe, so a
-     * plain file handle works — no JNI and no dependency. KRYPTIC_TIMEOUT_MS covers
+     * plain file handle works - no JNI and no dependency. KRYPTIC_TIMEOUT_MS covers
      * connecting (the pipe can briefly report "busy" between served clients); the read
-     * then blocks until the daemon replies, which it does immediately or not at all —
+     * then blocks until the daemon replies, which it does immediately or not at all -
      * matching the .NET client's semantics.
      */
     private static String roundTripNamedPipe(String path, String request) throws IOException {
@@ -238,7 +238,7 @@ public final class Kryptic {
 
     /** Walks up from the working directory looking for kryptic.json. */
     private static Map<String, Object> findKrypticJson() {
-        // Resolve via user.dir explicitly — java.nio caches the JVM-start directory otherwise.
+        // Resolve via user.dir explicitly - java.nio caches the JVM-start directory otherwise.
         Path directory = Path.of(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (directory != null) {
             Path candidate = directory.resolve("kryptic.json");
@@ -246,7 +246,7 @@ public final class Kryptic {
                 try {
                     return MiniJson.parseObject(Files.readString(candidate));
                 } catch (IOException | RuntimeException e) {
-                    warn("could not parse " + candidate + " — ignoring it.");
+                    warn("could not parse " + candidate + " - ignoring it.");
                     return null;
                 }
             }

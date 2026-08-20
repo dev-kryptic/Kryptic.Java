@@ -51,7 +51,7 @@ class KrypticTest {
     }
 
     private void startMockDaemon(Function<String, String> handler) throws IOException {
-        // Unix socket paths are length-capped — keep them short under /tmp.
+        // Unix socket paths are length-capped - keep them short under /tmp.
         socketDir = Files.createTempDirectory(Path.of("/tmp"), "kd");
         Path socket = socketDir.resolve("d.sock");
         server = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
@@ -74,7 +74,7 @@ class KrypticTest {
                     connection.close();
                 }
             } catch (IOException ignored) {
-                // server closed — test over
+                // server closed - test over
             }
         });
         thread.setDaemon(true);

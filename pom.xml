@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.kryptic</groupId>
-    <artifactId>krypticdev</artifactId>
+    <artifactId>daemon-client</artifactId>
     <version>0.1.0</version>
     <packaging>jar</packaging>
 
-    <name>Kryptic Java SDK</name>
-    <description>Passively injects development secrets from the Kryptic daemon. No-op outside development.</description>
+    <name>Kryptic Daemon Client</name>
+    <description>Passively injects development secrets from the local Kryptic daemon. No-op outside development.</description>
     <url>https://kryptic.dev</url>
 
     <licenses>
