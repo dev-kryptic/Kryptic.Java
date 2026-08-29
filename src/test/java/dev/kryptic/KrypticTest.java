@@ -35,7 +35,8 @@ class KrypticTest {
         System.setProperty("user.dir", projectDir.toString());
 
         for (String name : new String[] {"KRYPTIC_DISABLED", "KRYPTIC_PROJECT_ID", "KRYPTIC_ENV",
-                "SPRING_PROFILES_ACTIVE", "INJECTED_KEY", "EXISTING_KEY", "KRYPTIC_SOCKET_PATH"}) {
+                "SPRING_PROFILES_ACTIVE", "INJECTED_KEY", "EXISTING_KEY", "KRYPTIC_SOCKET_PATH",
+                "KRYPTIC_TIMEOUT_MS"}) {
             System.clearProperty(name);
         }
         System.setProperty("KRYPTIC_SILENT", "true");
@@ -48,6 +49,7 @@ class KrypticTest {
         System.clearProperty("INJECTED_KEY");
         System.clearProperty("EXISTING_KEY");
         System.clearProperty("KRYPTIC_SOCKET_PATH");
+        System.clearProperty("KRYPTIC_TIMEOUT_MS");
     }
 
     private void startMockDaemon(Function<String, String> handler) throws IOException {
@@ -106,6 +108,36 @@ class KrypticTest {
 
         assertEquals(0, result.injected());
         assertEquals("real-env-wins", System.getProperty("EXISTING_KEY"));
+    }
+
+    @Test
+    void timesOutWhenDaemonNeverReplies() throws IOException {
+        socketDir = Files.createTempDirectory(Path.of("/tmp"), "kd");
+        Path socket = socketDir.resolve("d.sock");
+        server = ServerSocketChannel.open(StandardProtocolFamily.UNIX);
+        server.bind(UnixDomainSocketAddress.of(socket));
+        System.setProperty("KRYPTIC_SOCKET_PATH", socket.toString());
+        System.setProperty("KRYPTIC_TIMEOUT_MS", "400");
+
+        Thread accepter = new Thread(() -> {
+            try {
+                SocketChannel connection = server.accept();
+                Thread.sleep(10_000);
+                connection.close();
+            } catch (Exception ignored) {
+                // test over
+            }
+        });
+        accepter.setDaemon(true);
+        accepter.start();
+
+        long started = System.nanoTime();
+        Kryptic.Result result = Kryptic.inject();
+        double seconds = (System.nanoTime() - started) / 1_000_000_000.0;
+
+        assertTrue(result.skipped());
+        assertEquals("daemon_unreachable", result.reason());
+        assertTrue(seconds < 1.2, "inject hung for " + seconds + "s");
     }
 
     @Test

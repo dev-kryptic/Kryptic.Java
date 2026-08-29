@@ -6,6 +6,8 @@ import java.io.RandomAccessFile;
 import java.net.StandardProtocolFamily;
 import java.net.UnixDomainSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -179,20 +181,55 @@ public final class Kryptic {
     }
 
     private static String roundTripUnixSocket(String path, String request) throws IOException {
-        try (SocketChannel channel = SocketChannel.open(StandardProtocolFamily.UNIX)) {
-            channel.connect(UnixDomainSocketAddress.of(Path.of(path)));
-            channel.write(ByteBuffer.wrap((request + "\n").getBytes(StandardCharsets.UTF_8)));
+        long deadlineNanos = System.nanoTime() + timeoutMs() * 1_000_000L;
+        try (SocketChannel channel = SocketChannel.open(StandardProtocolFamily.UNIX);
+             Selector selector = Selector.open()) {
+            channel.configureBlocking(false);
+            SelectionKey key = channel.register(selector, 0);
+            if (!channel.connect(UnixDomainSocketAddress.of(Path.of(path)))) {
+                key.interestOps(SelectionKey.OP_CONNECT);
+                awaitReady(selector, deadlineNanos, "connecting to");
+                if (!channel.finishConnect()) {
+                    throw new IOException("timed out connecting to the daemon");
+                }
+            }
+
+            ByteBuffer outgoing = ByteBuffer.wrap((request + "\n").getBytes(StandardCharsets.UTF_8));
+            while (outgoing.hasRemaining()) {
+                int written = channel.write(outgoing);
+                if (written > 0) continue;
+                if (written < 0) throw new IOException("connection closed");
+                key.interestOps(SelectionKey.OP_WRITE);
+                awaitReady(selector, deadlineNanos, "writing to");
+            }
 
             StringBuilder received = new StringBuilder();
             ByteBuffer buffer = ByteBuffer.allocate(8192);
             while (received.indexOf("\n") < 0) {
                 buffer.clear();
-                if (channel.read(buffer) < 0) throw new IOException("connection closed");
-                buffer.flip();
-                received.append(StandardCharsets.UTF_8.decode(buffer));
+                int read = channel.read(buffer);
+                if (read > 0) {
+                    buffer.flip();
+                    received.append(StandardCharsets.UTF_8.decode(buffer));
+                    continue;
+                }
+                if (read < 0) throw new IOException("connection closed");
+                key.interestOps(SelectionKey.OP_READ);
+                awaitReady(selector, deadlineNanos, "reading from");
             }
             return received.substring(0, received.indexOf("\n"));
         }
+    }
+
+    private static void awaitReady(Selector selector, long deadlineNanos, String verb) throws IOException {
+        long remainingMs = (deadlineNanos - System.nanoTime()) / 1_000_000L;
+        if (remainingMs <= 0) {
+            throw new IOException("timed out " + verb + " the daemon");
+        }
+        if (selector.select(remainingMs) == 0) {
+            throw new IOException("timed out " + verb + " the daemon");
+        }
+        selector.selectedKeys().clear();
     }
 
     /**
