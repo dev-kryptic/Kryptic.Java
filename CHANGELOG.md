@@ -5,6 +5,11 @@ the GitHub Release.
 
 ## Unreleased
 
+## 0.2.1
+
+- Honor `KRYPTIC_TIMEOUT_MS` on Unix sockets so a silent daemon cannot hang inject.
+- Publish pipeline reads Maven Central metadata directly for version resolution.
+
 ## 0.2.0
 
 Initial public release.

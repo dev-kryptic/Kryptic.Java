@@ -11,21 +11,19 @@ keeps the incoming version.
 
 from __future__ import annotations
 
-import json
 import re
 import sys
 import urllib.error
-import urllib.parse
 import urllib.request
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 GROUP_ID = "dev.kryptic"
 ARTIFACT_ID = "daemon-client"
-SEARCH_URL = (
-    "https://search.maven.org/solrsearch/select?"
-    + urllib.parse.urlencode(
-        {"q": f'g:"{GROUP_ID}" AND a:"{ARTIFACT_ID}"', "rows": "1", "wt": "json"}
-    )
+METADATA_URL = (
+    "https://repo1.maven.org/maven2/"
+    + GROUP_ID.replace(".", "/")
+    + f"/{ARTIFACT_ID}/maven-metadata.xml"
 )
 POM = Path("pom.xml")
 STABLE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
@@ -52,17 +50,18 @@ def read_pom_version() -> str:
 
 def latest_published() -> tuple[int, int, int] | None:
     try:
-        with urllib.request.urlopen(SEARCH_URL) as response:
-            payload = json.load(response)
+        with urllib.request.urlopen(METADATA_URL) as response:
+            root = ET.fromstring(response.read())
     except urllib.error.HTTPError as error:
         if error.code == 404:
             return None
         raise
-    docs = payload.get("response", {}).get("docs", [])
-    if not docs:
-        return None
-    latest = docs[0].get("latestVersion")
-    return parse(latest) if latest else None
+    versions = [
+        parsed
+        for version_elem in root.findall(".//versioning/versions/version")
+        if (parsed := parse(version_elem.text or ""))
+    ]
+    return max(versions) if versions else None
 
 
 def render(version: tuple[int, int, int]) -> str:
