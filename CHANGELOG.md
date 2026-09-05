@@ -5,6 +5,10 @@ the GitHub Release.
 
 ## Unreleased
 
+## 1.0.0
+
+First production release.
+
 ## 0.2.1
 
 - Honor `KRYPTIC_TIMEOUT_MS` on Unix sockets so a silent daemon cannot hang inject.
