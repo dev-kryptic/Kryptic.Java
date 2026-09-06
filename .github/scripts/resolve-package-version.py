@@ -28,7 +28,7 @@ METADATA_URL = (
 POM = Path("pom.xml")
 STABLE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 PROJECT_VERSION = re.compile(
-    r"(<artifactId>daemon-client</artifactId>\s*<version>)([^<]+)(</version>)",
+    r"(<artifactId>daemon-client-parent</artifactId>\s*<version>)([^<]+)(</version>)",
     re.DOTALL,
 )
 

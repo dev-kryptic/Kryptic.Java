@@ -1,6 +1,7 @@
 # Contributing
 
-This repository is the Java daemon client for Kryptic (`dev.kryptic:daemon-client`).
+This repository is the Java daemon client for Kryptic
+(`dev.kryptic:daemon-client` and `dev.kryptic:daemon-client-spring-boot`).
 
 ## What we accept
 

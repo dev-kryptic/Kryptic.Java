@@ -5,13 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.kryptic</groupId>
-    <artifactId>daemon-client</artifactId>
+    <artifactId>daemon-client-parent</artifactId>
     <version>1.0.1</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <name>Kryptic Daemon Client</name>
-    <description>Passively injects development secrets from the local Kryptic daemon. No-op outside development.</description>
+    <name>Kryptic Daemon Client Parent</name>
+    <description>Parent build for the Kryptic daemon client and Spring Boot module.</description>
     <url>https://kryptic.dev</url>
+
+    <modules>
+        <module>daemon-client</module>
+        <module>daemon-client-spring-boot</module>
+    </modules>
 
     <licenses>
         <license>
@@ -39,23 +44,45 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.version>6.1.21</spring.version>
+        <junit.version>5.11.4</junit.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.11.4</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>dev.kryptic</groupId>
+                <artifactId>daemon-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
             </plugin>
         </plugins>
     </build>

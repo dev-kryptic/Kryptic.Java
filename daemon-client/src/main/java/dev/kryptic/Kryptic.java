@@ -24,7 +24,7 @@ import java.util.Map;
  * starts with the configuration it already has.
  *
  * <p>Spring Boot integration ({@code @EnableKryptic} feeding the Spring Environment)
- * builds on {@link #fetch()} and ships as a separate module.
+ * builds on {@link #fetch()} and ships as {@code dev.kryptic:daemon-client-spring-boot}.
  *
  * <p>Protocol: daemon/PROTOCOL.md v1 (newline-delimited JSON over a local socket -
  * a unix domain socket on macOS/Linux, a named pipe on Windows).

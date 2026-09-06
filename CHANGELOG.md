@@ -5,6 +5,11 @@ the GitHub Release.
 
 ## Unreleased
 
+### Added
+
+- `dev.kryptic:daemon-client-spring-boot` with `@EnableKryptic`, which feeds
+  `Kryptic.fetch()` into the Spring Environment as a `kryptic` property source.
+
 ## 1.0.1
 
 Release 1.0.1.

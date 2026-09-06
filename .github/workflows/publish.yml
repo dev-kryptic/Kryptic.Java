@@ -95,19 +95,22 @@ jobs:
         run: |
           python3 - <<'PY'
           import os, pathlib, re
-          path = pathlib.Path("pom.xml")
           version = os.environ["VERSION"]
-          text = path.read_text(encoding="utf-8")
-          updated, count = re.subn(
-              r"(<artifactId>daemon-client</artifactId>\s*<version>)[^<]+(</version>)",
-              rf"\g<1>{version}\g<2>",
-              text,
-              count=1,
-              flags=re.DOTALL,
+          pattern = re.compile(
+              r"(<artifactId>daemon-client-parent</artifactId>\s*<version>)[^<]+(</version>)",
+              re.DOTALL,
           )
-          if count != 1:
-              raise SystemExit("Expected exactly one project version in pom.xml")
-          path.write_text(updated, encoding="utf-8")
+          paths = [
+              pathlib.Path("pom.xml"),
+              pathlib.Path("daemon-client/pom.xml"),
+              pathlib.Path("daemon-client-spring-boot/pom.xml"),
+          ]
+          for path in paths:
+              text = path.read_text(encoding="utf-8")
+              updated, count = pattern.subn(rf"\g<1>{version}\g<2>", text, count=1)
+              if count != 1:
+                  raise SystemExit(f"Expected exactly one parent version in {path}")
+              path.write_text(updated, encoding="utf-8")
           PY
 
       - name: Publish to Maven Central

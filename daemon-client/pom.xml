@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dev.kryptic</groupId>
+        <artifactId>daemon-client-parent</artifactId>
+        <version>1.0.1</version>
+    </parent>
+
+    <artifactId>daemon-client</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Kryptic Daemon Client</name>
+    <description>Passively injects development secrets from the local Kryptic daemon. No-op outside development.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
