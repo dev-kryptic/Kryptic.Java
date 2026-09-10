@@ -157,7 +157,14 @@ public final class Kryptic {
             String runtimeDir = env("XDG_RUNTIME_DIR");
             if (runtimeDir != null) return Path.of(runtimeDir, "kryptic-daemon.sock").toString();
         }
-        return "/tmp/kryptic-daemon.sock";
+        // Same per-user directory the daemon listens on (PROTOCOL.md). Never /tmp.
+        String home = System.getProperty("user.home");
+        if (os.contains("mac")) {
+            return Path.of(home, "Library", "Application Support", "kryptic", "kryptic-daemon.sock").toString();
+        }
+        String configHome = env("XDG_CONFIG_HOME");
+        if (configHome == null) configHome = Path.of(home, ".config").toString();
+        return Path.of(configHome, "kryptic", "kryptic-daemon.sock").toString();
     }
 
     private static long timeoutMs() {
