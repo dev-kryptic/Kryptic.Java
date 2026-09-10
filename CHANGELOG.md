@@ -5,6 +5,8 @@ the GitHub Release.
 
 ## Unreleased
 
+## 1.1.0 - 2026-09-10
+
 ### Added
 
 - `dev.kryptic:daemon-client-spring-boot` with `@EnableKryptic`, which feeds
